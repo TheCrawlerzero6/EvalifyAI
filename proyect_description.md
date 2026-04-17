@@ -269,6 +269,6 @@ Calidad:
 ## 14. Entregables de la Consigna
 
 - Proyecto dockerizado: cumplido (`docker-compose.yml` + Dockerfiles de backend/frontend).
-- Codigo documentado: parcialmente cumplido (documentacion externa fuerte; mejorar docstrings inline si se requiere criterio estricto).
+- Codigo documentado: cumplido (documentacion externa + docstrings en modulos clave del backend).
 - README de ejecucion: cumplido.
 - Despliegue web: opcional, no incluido en este MVP.

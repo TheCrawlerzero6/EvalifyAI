@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Orquestacion conversacional basada en LangGraph.
+
+Este modulo define el estado de sesion, nodos del flujo y helpers para
+invocar y recuperar snapshots de conversacion por thread_id.
+"""
+
 import json
 import logging
 from typing import Dict, List, TypedDict
@@ -28,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class SessionState(TypedDict, total=False):
+    """Representa el estado mutable de una sesion en el grafo."""
     input: str
     output: str
     estado: str
@@ -38,6 +45,7 @@ class SessionState(TypedDict, total=False):
 
 
 class ResultadoFinalLLM(BaseModel):
+    """Contrato de salida estructurada para la comparacion final."""
     diferencias: List[str]
     similitudes: List[str]
     ventajas: List[str]
@@ -56,6 +64,7 @@ def _coerce_state(state: SessionState) -> SessionState:
 
 
 def _normalize_criterios(criteria: List[str]) -> List[str]:
+    """Normaliza criterios: trim, minusculas, deduplicacion y limite de 3."""
     normalized = []
     seen = set()
     for criterion in criteria:
@@ -100,6 +109,7 @@ def _merge_provider_inputs(existing: List[dict], incoming: List[dict]) -> List[d
 
 
 def _extract_user_data(message: str) -> UserExtraction:
+    """Extrae proveedores, criterios e intencion de comparar desde texto libre."""
     logger.debug("Extraccion de datos de usuario iniciada message_len=%d", len(message))
     llm = build_llm(model_name=OPENAI_EXTRACTION_MODEL).with_structured_output(UserExtraction)
     prompt = (
@@ -144,6 +154,7 @@ def _parse_upload_input(message: str) -> ProveedorInput | None:
 
 
 def node_ingesta(state: SessionState) -> SessionState:
+    """Nodo inicial: fusiona entradas del usuario y valida precondiciones."""
     current = _coerce_state(state)
     message = (current.get("input") or "").strip()
     logger.info("Nodo ingesta estado_actual=%s input_len=%d", current.get("estado"), len(message))
@@ -246,6 +257,7 @@ def node_definir_criterios(state: SessionState) -> SessionState:
 
 
 def node_enriquecer(state: SessionState) -> SessionState:
+    """Nodo de enriquecimiento web por proveedor y criterio."""
     current = _coerce_state(state)
     criterios_base = _normalize_criterios(current.get("criterios", []))
     criterios_total = criterios_base + (["reputacion"] if "reputacion" not in criterios_base else [])
@@ -357,6 +369,7 @@ def _analyze_provider(provider: ProveedorAnalisis, criterios: List[str]) -> Dict
 
 
 def node_analisis_individual(state: SessionState) -> SessionState:
+    """Genera analisis por proveedor usando evidencia documental y web."""
     current = _coerce_state(state)
     criterios = _normalize_criterios(current.get("criterios", []))
     providers = []
@@ -411,6 +424,7 @@ def _serialize_analisis_individual(analisis: Dict[str, object]) -> Dict[str, dic
 
 
 def node_comparacion(state: SessionState) -> SessionState:
+    """Consolida el analisis y construye el resultado comparativo final."""
     current = _coerce_state(state)
     criterios = _normalize_criterios(current.get("criterios", []))
     providers = current.get("proveedores", [])
@@ -490,6 +504,7 @@ def route_after_criterios(state: SessionState) -> str:
 
 
 def build_graph(checkpointer=None):
+    """Compila y devuelve el grafo de estados de la conversacion."""
     workflow = StateGraph(SessionState)
     workflow.add_node("ingesta", node_ingesta)
     workflow.add_node("definir_criterios", node_definir_criterios)
@@ -510,6 +525,7 @@ def build_graph(checkpointer=None):
 
 
 def invoke_graph(app, thread_id: str, message: str) -> SessionState:
+    """Invoca el grafo para un thread_id y retorna estado normalizado."""
     logger.info("Invocando grafo thread_id=%s message_len=%d", thread_id, len(message))
     config = {"configurable": {"thread_id": thread_id}}
     result = _coerce_state(app.invoke({"input": message}, config=config))
@@ -518,6 +534,7 @@ def invoke_graph(app, thread_id: str, message: str) -> SessionState:
 
 
 def get_session_state(app, thread_id: str) -> SessionState:
+    """Obtiene el ultimo estado persistido de una sesion conversacional."""
     logger.debug("Obteniendo estado de sesion thread_id=%s", thread_id)
     snapshot = app.get_state({"configurable": {"thread_id": thread_id}})
     if not snapshot or not getattr(snapshot, "values", None):

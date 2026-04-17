@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Cliente OpenAI para el backend de Evalify AI."""
+
 import logging
 
 from langchain_openai import ChatOpenAI
@@ -10,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_llm(model_name: str | None = None) -> ChatOpenAI:
+    """Construye un cliente ChatOpenAI con parametros seguros por defecto."""
     selected_model = (model_name or OPENAI_MODEL).strip()
     kwargs = {"model": selected_model}
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Integracion de busqueda web via Tavily."""
+
 import logging
 import os
 from typing import Dict, List
@@ -45,6 +47,11 @@ def _normalize_result(result: dict, criterio: str, categoria: str | None = None)
 
 
 def search_for_criterion(provider_name: str, criterion: str) -> Dict[str, List]:
+    """Obtiene observaciones y fuentes web para un proveedor y criterio.
+
+    Para el criterio reputacion ejecuta subconsultas por categoria y
+    consolida resultados deduplicados.
+    """
     criterion = criterion.lower().strip()
     logger.info("Busqueda por criterio proveedor=%s criterio=%s", provider_name, criterion)
     if criterion == "reputacion":

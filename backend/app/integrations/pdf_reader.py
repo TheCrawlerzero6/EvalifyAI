@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Extraccion de texto desde archivos PDF."""
+
 from io import BytesIO
 import logging
 
@@ -9,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_pdf_text(file_bytes: bytes) -> str:
+    """Extrae y concatena el texto de todas las paginas de un PDF."""
     logger.debug("Extrayendo texto de PDF bytes=%d", len(file_bytes))
     reader = PdfReader(BytesIO(file_bytes))
     pages = []

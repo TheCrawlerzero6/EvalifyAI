@@ -38,6 +38,16 @@ Monorepo con dos componentes:
 - `backend/`: FastAPI + LangGraph + OpenAI + Tavily + SQLite
 - `frontend/`: React + Vite (chat y carga de PDF)
 
+## Documentacion de codigo
+
+El backend incluye docstrings en modulos clave para facilitar mantenimiento y handoff tecnico:
+
+- `backend/app/main.py`: ciclo de vida de la API y recursos compartidos.
+- `backend/app/routes.py`: contrato y objetivo de cada endpoint.
+- `backend/app/services/graph_builder.py`: flujo conversacional y orquestacion LangGraph.
+- `backend/app/integrations/*.py`: comportamiento de integraciones OpenAI, PDF y Tavily.
+- `backend/app/services/formatter.py`: formateo de la salida final para chat.
+
 ```text
 .
 ├── backend/

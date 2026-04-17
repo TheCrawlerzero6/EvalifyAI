@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+"""Helpers de formateo de salida para respuestas al usuario."""
+
 from app.schemas.domain import ResultadoFinal
 
 
 def format_resultado_final(resultado: ResultadoFinal) -> str:
+    """Convierte un ResultadoFinal estructurado en texto legible para chat."""
     lines = ["Comparacion completada con evidencia.", ""]
     lines.append("Diferencias:")
     lines.extend([f"- {item}" for item in resultado.diferencias] or ["- Sin diferencias concluyentes."])

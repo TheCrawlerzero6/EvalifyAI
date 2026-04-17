@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Configuracion central del backend.
+
+Carga variables de entorno desde backend/.env y expone constantes
+consumidas por el resto de modulos de la API.
+"""
+
 import os
 from pathlib import Path
 

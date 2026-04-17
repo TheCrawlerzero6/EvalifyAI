@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Rutas HTTP de la API Evalify AI.
+
+Expone endpoints para salud, chat conversacional, carga de contenido
+documental y consulta del estado de sesion.
+"""
+
 import json
 import logging
 from typing import Optional
@@ -18,12 +24,14 @@ logger = logging.getLogger(__name__)
 
 @router.get("/health")
 def health() -> dict:
+    """Devuelve estado de salud basico del servicio."""
     logger.info("Health check solicitado")
     return {"status": "ok"}
 
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest, request: Request) -> ChatResponse:
+    """Procesa un mensaje de chat y retorna el estado conversacional actual."""
     logger.info("Solicitud /chat thread_id=%s message_len=%d", req.thread_id, len(req.message))
     graph_app = request.app.state.graph
     try:
@@ -60,6 +68,7 @@ def chat(req: ChatRequest, request: Request) -> ChatResponse:
 
 @router.get("/session/{thread_id}")
 def session_state(thread_id: str, request: Request) -> dict:
+    """Recupera un snapshot de sesion persistida por thread_id."""
     logger.info("Solicitud /session thread_id=%s", thread_id)
     graph_app = request.app.state.graph
     state = get_session_state(graph_app, thread_id)
@@ -82,6 +91,7 @@ async def upload(
     text: Optional[str] = Form(default=None),
     file: Optional[UploadFile] = File(default=None),
 ) -> dict:
+    """Incorpora texto o PDF a una sesion para su posterior analisis."""
     logger.info(
         "Solicitud /upload thread_id=%s provider=%s has_text=%s has_file=%s",
         thread_id,

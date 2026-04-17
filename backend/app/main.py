@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Punto de entrada de la API FastAPI.
+
+Configura logging, CORS y el ciclo de vida de recursos compartidos,
+incluyendo la inicializacion del grafo conversacional con persistencia.
+"""
+
 from contextlib import asynccontextmanager
 import logging
 
@@ -25,6 +31,11 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Inicializa y libera recursos compartidos de la aplicacion.
+
+    Durante el arranque crea el checkpointer SQLite y compila el grafo
+    conversacional. Al apagar, cierra explicitamente el contexto SQLite.
+    """
     logger.info("Iniciando recursos de aplicacion")
     checkpointer_cm = None
     checkpointer_entered = False
